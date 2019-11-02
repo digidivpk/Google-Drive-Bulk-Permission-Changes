@@ -1,5 +1,5 @@
 const fs = require('fs');
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, Menu } = require('electron');
 const {google} = require('googleapis');
 const path = require('path');
 
@@ -39,6 +39,7 @@ class GoogleApi {
         const auth = this.oAuth2Client;
         this.drive = google.drive({version: 'v2', auth});
         this.mainWindow.send('google-auth-token',  token)
+        this.mainWindow.show();
     }
 
     logout(){
@@ -47,7 +48,7 @@ class GoogleApi {
             if(fs.existsSync(file_path)) {
                 fs.unlink(file_path, (error) => {
                     if (error) {
-                        this.token = null
+                        this.token = null;
                         reject(error)
                     } else {
                         resolve('removed')
@@ -89,14 +90,19 @@ class GoogleApi {
         });
     }
     uploadCredentials(){
+        Menu.setApplicationMenu(null);
         const options = {
             width: 640,
             height: 480,
+            frame:false,
             webPreferences: {
                 nodeIntegration: true
             }
         };
         const win = new BrowserWindow(options || {'use-content-size': true});
+        win.setMaximizable(false);
+        win.setResizable(false);
+        win.setMinimizable(false);
         let html_file = path.join(__dirname, "..", "resources", "credentials.html");
         win.loadURL(`file://${html_file}`);
         win.on('closed', () => {
@@ -169,6 +175,7 @@ class GoogleApi {
 
     authorizeApp(){
         return new Promise((resolve, reject) => {
+            Menu.setApplicationMenu(null);
             const options = {
                 width: 900,
                 height: 680,
@@ -177,6 +184,9 @@ class GoogleApi {
                 }
             };
             const win = new BrowserWindow(options || {'use-content-size': true});
+            win.setMaximizable(false);
+            win.setResizable(false);
+            win.setMinimizable(false);
 
             win.loadURL(this.authUrl);
 

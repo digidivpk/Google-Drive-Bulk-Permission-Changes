@@ -1,4 +1,4 @@
-const {app, BrowserWindow, ipcMain, screen} = require('electron');
+const {app, BrowserWindow, ipcMain, screen, Menu} = require('electron');
 const isDev = require('electron-is-dev');
 const serve = require('electron-serve');
 
@@ -10,6 +10,7 @@ let mainWindow;
 let auth = new GoogleApi();
 
 function createWindow() {
+  Menu.setApplicationMenu(null);
   const {width, height} = screen.getPrimaryDisplay().workAreaSize
   const options = {
     width: width,
@@ -21,15 +22,14 @@ function createWindow() {
   if(isDev){
     mainWindow = new BrowserWindow(options);
     mainWindow.loadURL('http://localhost:3000');
+    mainWindow.minimize();
     mainWindow.on('closed', () => mainWindow = null);
     auth.init(mainWindow)
   }else{
     (async () => {
 
       mainWindow = new BrowserWindow(options);
-
       await loadURL(mainWindow);
-
       // The above is equivalent to this:
       await mainWindow.loadURL('app://-');
       auth.init(mainWindow)
@@ -67,13 +67,17 @@ ipcMain.on('google-auth-permissions', (event, permissions) => {
   console.log("google-auth-permissions", permissions)
 });
 
-ipcMain.on('google-auth-status-main', (event, arg) => {
-  event.reply('google-auth-token',  auth.token)
-});
-
 ipcMain.on('google-auth-logout', (event, arg) => {
   auth.logout().then((data)=>{
+    auth.token = null;
+    event.reply('google-auth-logout',  'Logout')
+  }).catch((error)=>{
+    auth.token = null;
     event.reply('google-auth-logout',  'Logout')
   })
+});
+
+ipcMain.on('google-auth-status-main', (event, arg) => {
+  event.reply('google-auth-token',  auth.token)
 });
 
