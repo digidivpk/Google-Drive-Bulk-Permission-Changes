@@ -1,0 +1,125 @@
+{
+  "name": "google-drive",
+  "productName": "google-drive",
+  "description": "description",
+  "version": "0.1.0",
+  "private": true,
+  "main": "public/electron.js",
+  "homepage": "./",
+  "dependencies": {
+    "@material-ui/core": "^4.5.2",
+    "@material-ui/icons": "^4.5.1",
+    "electron-is-dev": "^1.1.0",
+    "electron-serve": "^0.4.0",
+    "googleapis": "39",
+    "react": "^16.11.0",
+    "react-dom": "^16.11.0",
+    "react-scripts": "3.2.0"
+  },
+  "scripts": {
+    "react-start": "react-scripts start",
+    "react-build": "react-scripts build",
+    "react-test": "react-scripts test --env=jsdom",
+    "react-eject": "react-scripts eject",
+    "electron-build": "electron-builder build",
+    "release": "yarn react-build && electron-builder --publish=always",
+    "build": "yarn react-build && yarn electron-build",
+    "start": "concurrently \"BROWSER=none yarn react-start\" \"wait-on http://localhost:3000 && electron .\""
+  },
+  "build": {
+    "productName": "google-drive",
+    "appId": "org.develar.ElectronReact",
+    "files": [
+      "credentials/",
+      "build/",
+      "build/**",
+      "build/**/**",
+      "build/electron.js",
+      "resources/",
+      "package.json"
+    ],
+    "asar": true,
+    "dmg": {
+      "contents": [
+        {
+          "x": 130,
+          "y": 220
+        },
+        {
+          "x": 410,
+          "y": 220,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    },
+    "win": {
+      "target": [
+        "nsis",
+        "msi",
+        "nsis-web"
+      ],
+      "icon": "resources/icon.ico"
+    },
+    "linux": {
+      "target": [
+        "deb",
+        "snap",
+        "AppImage"
+      ],
+      "icon": "resources/icon.icns",
+      "category": "Development"
+    },
+    "directories": {
+      "buildResources": "resources",
+      "output": "dist"
+    },
+    "extraFiles": [
+      "credentials"
+    ],
+    "publish": {
+      "provider": "github",
+      "owner": "electron-react-boilerplate",
+      "repo": "electron-react-boilerplate",
+      "private": false
+    }
+  },
+  "author": {
+    "name": "Digital Division Pakistan",
+    "email": "usama@digidiv.pk",
+    "url": "http://digidiv.pk"
+  },
+  "contributors": [
+    {
+      "name": "Usama Bin Liaqat",
+      "email": "usama@digidiv.pk",
+      "url": "http://digidiv.pk"
+    },
+    {
+      "name": "Umer Farooq",
+      "email": "umer@digidiv.pk",
+      "url": "http://digidiv.pk"
+    }
+  ],
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "concurrently": "^5.0.0",
+    "electron": "^7.0.0",
+    "electron-builder": "^22.1.0",
+    "wait-on": "^3.3.0"
+  }
+}
