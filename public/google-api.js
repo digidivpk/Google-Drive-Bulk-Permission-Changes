@@ -12,7 +12,7 @@ function getSharedPath(name = null) {
 }
 
 class GoogleApi {
-    SCOPES = ['https://www.googleapis.com/auth/drive'];
+    SCOPES = ['https://www.googleapis.com/auth/drive.file'];
     TOKEN_PATH = getSharedPath("token.json");
     CREDENTIALS_PATH = getSharedPath("credentials.json")
     credentials = null;
