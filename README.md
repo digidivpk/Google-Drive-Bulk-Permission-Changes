@@ -1,68 +1,65 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# Welcome to Drive Permission Changer
 
-## Available Scripts
+Driver permission changer is an open source application created to change permission of google drive files and folders in **bulk mode** . The files can be some safe points and it is hard to change it manually by going to each file one by one . You can also specify a list of users or configure the link sharing option just in  **One Click**
 
-In the project directory, you can run:
 
-### `yarn start`
+## Setup and build
 
-Runs the app in the development mode.<br />
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+This is a ready to use application . You just enter your credentials for google driver app and start using . Here is some simple steps to follow 
 
-The page will reload if you make edits.<br />
-You will also see any lint errors in the console.
+ 1. Enable Google Drive API 
+ 2. Create an App consent screen  on google cloud  
+ 3. Create and Download Oath Credentials file
+ 4. Clone and Build this project 
+ 5. Configure Credentials 
+ 6. Start Using 
 
-### `yarn test`
+ 
 
-Launches the test runner in the interactive watch mode.<br />
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Detailed Guide Line
+Follow the steps below before you clone and build the project 
 
-### `yarn build`
+ #### Enable Google drive API 
+ Follow the link below 
+ [Enable Google Drive API ](https://developers.google.com/drive/api/v3/enable-drive-api)
+ follow all the instruction provided in the link to enable drive API 
+ 
+  #### Create an App consent screen  on google cloud 
+  Create an Oath application in google cloud with the following scope
 
-Builds the app for production to the `build` folder.<br />
-It correctly bundles React in production mode and optimizes the build for the best performance.
+> [https://www.googleapis.com/auth/drive.file](https://www.googleapis.com/auth/drive.file)
 
-The build is minified and the filenames include the hashes.<br />
-Your app is ready to be deployed!
+Follow the link `[Configure Consent Screen ](https://console.developers.google.com/apis/credentials/consent)` and add the given scope to your application .
+You can skip this step if it is already configured .
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+  #### Create and Download Oath Credentials file
+  Follow the link for detailed instructions to `[Create Oauth credentials](https://support.google.com/googleapi/answer/6158849?hl=en)`
+  While creating credentials chose 
 
-### `yarn eject`
+> Other 
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+as credentials type . After creating the credentials download the credentials JSON file 
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+ #### Clone and Build this project 
+ Clone this project in any of the directory and run the following commands
+ 
 
-Instead, it will copy all the configuration files and the transitive dependencies (Webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+    yarn install
+    
+this will install all the dependencies of the application . now you can build the application for windows or Linux
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+    yarn build --win
+    yarn build --linux
 
-## Learn More
+Tool is ready to use . open the executable file and start using 
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+ #### Configure Credentials 
+ 
+First screen of application will ask you for a JSON credentials file . provide a valid credentials file created in previous step .it will Proceed to Login
+ 
+  #### Start Using
+Application has a good simple interface . you can add file ids , permission type , permission target group or users with simple clicks . You can also import data using a csv file 
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+The repository has sample CSV files . you must follow the same format 
 
-### Code Splitting
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/code-splitting
-
-### Analyzing the Bundle Size
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size
-
-### Making a Progressive Web App
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app
-
-### Advanced Configuration
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/advanced-configuration
-
-### Deployment
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/deployment
-
-### `yarn build` fails to minify
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
+For more Updates and other cool tools visit [www.digidiv.pk](www.digidiv.pk)
