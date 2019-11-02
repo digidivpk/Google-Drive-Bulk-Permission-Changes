@@ -62,4 +62,4 @@ Application has a good simple interface . you can add file ids , permission type
 
 The repository has sample CSV files . you must follow the same format 
 
-For more Updates and other cool tools visit [www.digidiv.pk](www.digidiv.pk)
+For more Updates and other cool tools visit [www.digidiv.pk](http://www.digidiv.pk)
