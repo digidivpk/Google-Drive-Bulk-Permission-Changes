@@ -2,6 +2,8 @@
 
 Driver permission changer is an open source application created to change permission of google drive files and folders in **bulk mode** . The files can be some safe points and it is hard to change it manually by going to each file one by one . You can also specify a list of users or configure the link sharing option just in  **One Click**
 
+[![Download Google Drive Permission Manager](https://a.fsdn.com/con/app/sf-download-button)](https://sourceforge.net/projects/gdpm-digidivpk/files/latest/download)
+
 
 ## Setup and build
 
