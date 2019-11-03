@@ -35,6 +35,9 @@ const styles = theme => ({
     },
     cardButton: {
         marginLeft: 'auto',
+    },
+    button: {
+        margin: theme.spacing(1),
     }
 });
 
@@ -69,9 +72,77 @@ class Forms extends Component {
         disableUserFields: [],
         buttonStatus: true,
         tableData:[],
-        loading:false
+        loading:false,
+        submitBtn:false
     };
 
+    updateSubmitBtnStatus(){
+        let permissions = this.state.permissions;
+        let users = this.state.users;
+        let newState = false;
+        let usersState = false;
+        permissions.forEach((item)=>{
+            if(!Object.values(item).every((x)=>(!x))){
+                if(item.permission === 'domain'){
+                    if(
+                        !!item.domain &&
+                        !!item.id &&
+                        !!item.include &&
+                        !!item.role
+                    ){
+                        newState = true;
+                    }else {
+                        newState = false;
+                    }
+                }else if(item.permission === 'user'){
+                    if(
+                        !!item.id &&
+                        !!item.include
+                    ){
+                        newState = true
+                    }else {
+                        newState = false;
+                    }
+                    usersState = true
+                }else {
+                    if(
+                        !!item.id &&
+                        !!item.include &&
+                        !!item.permission &&
+                        !!item.role
+                    ){
+                        newState = true
+                    }else {
+                        newState = false;
+                    }
+                }
+            }
+
+        });
+        if(usersState){
+            if(users.length > 1){
+                users.forEach((user)=>{
+                    if(!!user.emailAddress && !!user.role){
+                        if(user.emailAddress.match(/\S+@\S+\.\S+/)){
+                            newState = true
+                        }else{
+                            newState = false
+                        }
+
+                    }else if((!!user.emailAddress && !user.role) || (!!user.role && !user.emailAddress)){
+                        newState = false
+                    }
+                })
+            }else {
+                newState = false
+            }
+        }
+
+        this.setState({
+            submitBtn: newState
+        })
+
+    }
     shouldComponentUpdate(nextProps, nextState) {
         return this.state.permissions === nextState.permissions || this.state.users === nextState.users;
     }
@@ -159,10 +230,12 @@ class Forms extends Component {
                 item.hasOwnProperty('id') &&
                 item.hasOwnProperty('permission') )).length
             ){
+                content.push(permissionFieldValues);
                 this.setState({
                     permissions:content
                 });
-                this.updateUserDisplayState()
+                this.updateUserDisplayState();
+                this.updateSubmitBtnStatus();
             }else{
                 alert('Invalid File, Please Upload Correct Permissions File')
             }
@@ -181,9 +254,11 @@ class Forms extends Component {
                 item.hasOwnProperty('emailAddress') &&
                 item.hasOwnProperty('role') )).length
             ){
+                content.push(userPermissionFormFieldsValues);
                 this.setState({
                     users:content
                 });
+                this.updateSubmitBtnStatus();
             }else {
                 alert('Invalid File, Please Upload Correct Users File')
             }
@@ -235,6 +310,7 @@ class Forms extends Component {
             permissions:permissionsValues
         });
         this.updateUserDisplayState()
+        this.updateSubmitBtnStatus()
 
 
     };
@@ -259,6 +335,7 @@ class Forms extends Component {
         this.setState({
             users:usersValues
         })
+        this.updateSubmitBtnStatus()
     };
 
     componentDidMount() {
@@ -272,9 +349,9 @@ class Forms extends Component {
                 alert('File Permissions Updated Successfully')
                 console.log("google-auth-permissions", data)
             }else if(data.status === 'progress'){
-                console.log("google-auth-permissions", data.response.permission)
+                console.log("google-auth-permissions", data)
                 this.setState({
-                    tableData: tableStateUpdate(this.state.tableData, data.response.permission)
+                    tableData: tableStateUpdate(this.state.tableData, data.response)
                 });
             }
 
@@ -295,15 +372,28 @@ class Forms extends Component {
             <React.Fragment>
                 <Card className={classes.cardControll}>
                     <CardHeader title="Files and Folder Details" action={
-                        this.state.buttonStatus &&
-                        (<Button
-                            variant="contained"
-                            component="label"
-                            size="small"
-                        >
-                            Upload CSV
-                            <input accept=".csv" type="file" style={{ display: "none" }} onChange={this.handlePermissionCSV} />
-                        </Button>)
+                        <React.Fragment>
+                            <Button
+                                variant="contained"
+                                component="label"
+                                size="small"
+                                onClick={()=>{window.location.reload()}}
+                                className={classes.button}
+                                color="primary"
+                            >
+                                Reload
+                            </Button>
+                            {this.state.buttonStatus &&
+                                (<Button
+                                    variant="contained"
+                                    component="label"
+                                    size="small"
+                                >
+                                    Upload CSV
+                                    <input accept=".csv" type="file" style={{ display: "none" }} onChange={this.handlePermissionCSV} />
+                                </Button>)
+                                }
+                        </React.Fragment>
                     } />
                     <CardContent>
                         <Form 
@@ -317,7 +407,7 @@ class Forms extends Component {
                         {this.state.loading && (<div className={classes.root}>
                             <LinearProgress />
                         </div>)}
-                        {this.state.buttonStatus && (<Button
+                        {this.state.buttonStatus && this.state.submitBtn && (<Button
                             size="small"
                             variant="contained"
                             color="primary"
@@ -326,6 +416,16 @@ class Forms extends Component {
                         >
                             Submit
                         </Button>)}
+                        {this.state.buttonStatus && !this.state.submitBtn && (<Button
+                            size="small"
+                            variant="contained"
+                            color="primary"
+                            disabled={true}
+                            className={classes.cardButton}
+                        >
+                            Submit
+                        </Button>)}
+
                     </CardActions>
                 </Card>
                 {this.state.usersDisplay && (
