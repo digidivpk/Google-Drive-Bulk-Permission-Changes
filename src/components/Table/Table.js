@@ -39,6 +39,7 @@ export default function DenseTable(props) {
                             <TableCell>Include</TableCell>
                             <TableCell>File Id</TableCell>
                             <TableCell>Permissions</TableCell>
+                            <TableCell>Status</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -62,12 +63,29 @@ export default function DenseTable(props) {
                                         variant="outlined"
                                     />
                                 </TableCell>
-                                <TableCell>{row.permissions.map((item)=>{
-                                    return (<Chip
-                                        label={item}
-                                        variant="outlined"
-                                    />)
-                                })}</TableCell>
+                                <TableCell>
+                                    {row.permissions.map((item)=>{
+                                        return (<Chip
+                                            label={item}
+                                            variant="outlined"
+                                        />)
+                                    })}
+                                </TableCell>
+                                <TableCell>
+                                    {!!row.hasOwnProperty('error') && (
+                                        <Chip
+                                            label={row.error.message}
+                                            variant="outlined"
+                                            color="secondary"
+                                        />
+                                    )}
+                                    {!row.hasOwnProperty('error') && (
+                                        <Chip
+                                            label={"File Updated Succcessfully"}
+                                            variant="outlined"
+                                        />
+                                    )}
+                                </TableCell>
                             </TableRow>
                         ))}
                     </TableBody>

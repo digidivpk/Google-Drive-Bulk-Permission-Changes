@@ -22,27 +22,32 @@ class GoogleApi {
     drive = null;
 
     init(win){
+        console.log('GoogleApi init');
         this.mainWindow = win;
         this.createDirectory();
         this.getCredentials();
     }
 
     createDirectory(){
+        console.log('GoogleApi createDirectory');
         if(!fs.existsSync(getSharedPath())){
             fs.mkdirSync(getSharedPath());
         }
     }
 
     assignToken(token){
+        console.log('GoogleApi assignToken');
         this.token = token;
         this.oAuth2Client.setCredentials(token);
         const auth = this.oAuth2Client;
-        this.drive = google.drive({version: 'v2', auth});
+        let drive = google.drive({version: 'v2', auth});
+        this.drive = drive;
         this.mainWindow.send('google-auth-token',  token)
         this.mainWindow.show();
     }
 
     logout(){
+        console.log('GoogleApi logout');
         let file_path = this.TOKEN_PATH
         return new Promise((resolve, reject)=>{
             if(fs.existsSync(file_path)) {
@@ -62,6 +67,7 @@ class GoogleApi {
     }
 
     readFile(file_path, options){
+        console.log('GoogleApi readFile');
         return new Promise((resolve, reject) => {
             if(fs.existsSync(file_path)){
                 fs.readFile(file_path, options, (error, data) => {
@@ -79,6 +85,7 @@ class GoogleApi {
         });
     }
     writeFile(file_path, content){
+        console.log('GoogleApi writeFile');
         return new Promise((resolve, reject) => {
             fs.writeFile(file_path, content, (error) => {
                 if(error){
@@ -90,6 +97,7 @@ class GoogleApi {
         });
     }
     uploadCredentials(){
+        console.log('GoogleApi uploadCredentials');
         Menu.setApplicationMenu(null);
         const options = {
             width: 640,
@@ -121,11 +129,12 @@ class GoogleApi {
         });
     }
     getCredentials(){
+        console.log('GoogleApi getCredentials');
         if(fs.existsSync(this.CREDENTIALS_PATH)){
             this.readFile(this.CREDENTIALS_PATH, 'utf-8').then((data)=>{
                 this.credentials = JSON.parse(data)
                 this.authorize();
-                console.log("The file content is : " + this.credentials);
+                console.log("The file content is : ", this.credentials);
             }).catch((error)=>{
                 console.log("An error ocurred reading the file :" + error);
             })
@@ -136,17 +145,19 @@ class GoogleApi {
     }
 
     authorize(){
+        console.log('GoogleApi authorize');
         const {client_secret, client_id, redirect_uris} = this.credentials.installed;
         this.oAuth2Client = new google.auth.OAuth2(client_id, client_secret, redirect_uris[0]);
         this.readFile(this.TOKEN_PATH, 'utf-8').then((token)=>{
             this.assignToken(JSON.parse(token))
-            console.log("The file content is : " + this.token);
+            console.log("The file content is : ", this.token);
         }).catch((error)=>{
             console.log("An error ocurred reading the file :" + error);
             this.getAuthUrl()
         })
     }
     getAuthUrl(){
+        console.log('GoogleApi getAuthUrl');
         this.authUrl = this.oAuth2Client.generateAuthUrl({
             access_type: 'offline',
             scope: this.SCOPES,
@@ -164,6 +175,7 @@ class GoogleApi {
     }
 
     queryParse(query){
+        console.log('GoogleApi queryParse');
         let queryObject = Object()
         query.split('&').map((item)=>{
             let arr = item.split('=')
@@ -174,6 +186,7 @@ class GoogleApi {
     }
 
     authorizeApp(){
+        console.log('GoogleApi authorizeApp');
         return new Promise((resolve, reject) => {
             Menu.setApplicationMenu(null);
             const options = {
@@ -212,6 +225,7 @@ class GoogleApi {
     }
 
     getAccessToken(code){
+        console.log('GoogleApi getAccessToken');
         return new Promise((resolve, reject) => {
             this.oAuth2Client.getToken(code, (error, token) => {
                 if (error) {
@@ -234,6 +248,7 @@ class GoogleApi {
 
 
     insertPermission(fileId, resource){
+        console.log('GoogleApi insertPermission');
         return new Promise((resolve, reject) => {
             if(!!this.drive){
                 this.drive.permissions.insert({
@@ -252,37 +267,181 @@ class GoogleApi {
         });
     }
 
+    getFilesListByFolderId(folderId){
+        console.log('GoogleApi getFilesListByFolderId');
+        return new Promise((resolve, reject) => {
+            if(!!this.drive){
+                this.drive.children.list({
+                    folderId:folderId,
+                },(err, res) => {
+                    if(err){
+                        reject(err)
+                    }else if(res){
+                        resolve(res)
+                    }
+                })
+            }else {
+                reject('Authentication Failed')
+            }
+        });
+    }
+
+    async assignPermissionstoFolderChildrens(folderId, resource){
+        console.log('GoogleApi assignPermissionstoFolderChildrens');
+        try{
+            const files = await this.getFilesListByFolderId(folderId);
+            console.log("FILES LIST Of Folder: ", files);
+            const { items } = files.data;
+            let responseData = {
+                type:'success',
+                response:[]
+            };
+            for (let index = 0; index < items.length; index++) {
+                try{
+                    let data = await this.insertPermission(items[index].id, resource);
+                    responseData.response.push({
+                        status:'success',
+                        data: data.data
+                    })
+                }catch (e) {
+                    responseData.response.push({
+                        status:'error',
+                        code:e.code,
+                        message:e.message
+                    });
+                }
+
+            }
+            return responseData
+
+
+        }catch (e) {
+            console.log("Error Finding File: ", e);
+            return {
+                status:'error',
+                code:e.code,
+                message:e.message,
+                error:e
+            }
+        }
+    }
+    sendProgressStatus(message, type){
+        console.log('GoogleApi sendProgressStatus');
+        let response = {
+            status: "progress",
+            type:type,
+            response: message
+        };
+        this.mainWindow.send('google-auth-permissions', response);
+        console.log(response)
+    }
     async assignPermission(permissions){
+        console.log('GoogleApi assignPermission');
         let eventData = {
             status: "success",
             response:[]
         };
         for (let index = 0; index < permissions.length; index++) {
             try{
-                let data = await this.insertPermission(permissions[index].permission.fileId, permissions[index].resource)
-                eventData.response.push({
-                    permission: permissions[index],
-                    data:data.data
-                });
-                let response = {
-                    status: "progress",
-                    response: {
-                        status:true,
-                        data:data.data,
+                let data
+                if(permissions[index].permission.include === 'folder'){
+                    data = await this.assignPermissionstoFolderChildrens(permissions[index].permission.fileId, permissions[index].resource);
+                    console.log('Assign Permissions to Folder Childrens: ', data)
+                    if(data.status === 'error'){
+                        let errorMessage = {
+                            include: permissions[index].permission.include,
+                            permission: permissions[index],
+                            error:{
+                                code: data.code,
+                                message: data.message,
+                                response:data.error
+                            }
+                        };
+                        this.sendProgressStatus(errorMessage, 'error');
+                        continue;
+                    }
+                    let eventMessage = {
+                        include: permissions[index].permission.include,
                         permission: permissions[index],
+                        data:data
+                    };
+                    eventData.response.push(eventMessage);
+                    this.sendProgressStatus(eventMessage, 'success')
+                }else if(permissions[index].permission.include === 'file'){
+                    data = await this.insertPermission(permissions[index].permission.fileId, permissions[index].resource);
+                    let eventMessage = {
+                        include: permissions[index].permission.include,
+                        permission: permissions[index],
+                        data:data.data,
+                    }
+                    eventData.response.push(eventMessage);
+                    this.sendProgressStatus(eventMessage, 'success')
+                }else if(permissions[index].permission.include === 'both'){
+                    let file = await this.assignPermissionstoFolderChildrens(permissions[index].permission.fileId, permissions[index].resource);
+                    data = await this.insertPermission(permissions[index].permission.fileId, permissions[index].resource);
+                    if(file.status === 'error'){
+                        let errorMessage = {
+                            include: permissions[index].permission.include,
+                            permission: permissions[index],
+                            error:{
+                                code: file.error.code,
+                                message: file.error.message,
+                                response:file.error
+                            }
+                        };
+                        this.sendProgressStatus(errorMessage, 'error');
+                        continue;
+                    }
+                    let eventMessage = {
+                        include: permissions[index].permission.include,
+                        permission: permissions[index],
+                        data:{
+                            file: data.data,
+                            folder:file
+                        },
+                    };
+                    eventData.response.push(eventMessage);
+                    this.sendProgressStatus(eventMessage, 'success')
+                }
+            }catch (e){
+                let eventMessage = {
+                    include: permissions[index].permission.include,
+                    permission: permissions[index],
+                    error:{
+                        code: e.code,
+                        message: e.message,
+                        response:e
                     }
                 };
-                this.mainWindow.send('google-auth-permissions', response);
-                console.log("Success: ", response)
-            }catch (e){
-                index--
-                console.log("Error: ", e.message)
+                this.sendProgressStatus(eventMessage, 'error');
+                console.error("Error: ", e.message)
             }
         }
 
         this.mainWindow.send('google-auth-permissions', eventData)
 
     }
+
+    listFiles() {
+        console.log('GoogleApi listFiles');
+        let drive = this.drive;
+        return new Promise((resolve, reject) => {
+            drive.files.list({
+                corpora:'default',
+                pageSize: 10,
+            }, (err, res) => {
+                if (err) {
+                    reject(err)
+                }else {
+                    resolve(res.data.items)
+                }
+            });
+        });
+
+    }
+
+
+
 }
 
 module.exports.GoogleApi = GoogleApi;

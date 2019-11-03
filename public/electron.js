@@ -23,6 +23,7 @@ function createWindow() {
     mainWindow = new BrowserWindow(options);
     mainWindow.loadURL('http://localhost:3000');
     mainWindow.minimize();
+    mainWindow.openDevTools()
     mainWindow.on('closed', () => mainWindow = null);
     auth.init(mainWindow)
   }else{
@@ -59,12 +60,13 @@ ipcMain.on('google-auth-view', (event, arg) => {
 });
 
 ipcMain.on('google-auth-permissions', (event, permissions) => {
+  console.log("google-auth-permissions", permissions)
   auth.assignPermission(permissions)
   event.reply('google-auth-permissions',  {
     status: "pending",
     all:true
   })
-  console.log("google-auth-permissions", permissions)
+
 });
 
 ipcMain.on('google-auth-logout', (event, arg) => {
